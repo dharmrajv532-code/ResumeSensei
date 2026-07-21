@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/welcome_page.png" alt="ResumeSensei Header" width="100%" style="border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);" />
+  <img src="assets/banner.png" alt="ResumeSensei Header" width="100%" style="border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);" />
 
   # 🎓 ResumeSensei
   <h3>AI-Powered Conversational Resume Analyser & Job Matching Agent</h3>
@@ -180,3 +180,13 @@ git push -u origin feature/groq-chat-integration
 4. Add a title (e.g., `feat: Phase 2 Groq API and Conversational Dashboard`) and a description of your changes.
 5. Click **"Create pull request"**.
 6. Review the code changes, wait for automated checks, and merge it when approved!
+
+---
+
+## 📬 Contact & Developer Info
+
+If you have any questions, suggestions, or want to connect, feel free to reach out:
+
+* **📧 Email**: [dharmrajv532@gmail.com](mailto:dharmrajv532@gmail.com)
+* **🔗 LinkedIn**: [Dharmraj Verma](https://www.linkedin.com/in/dharmraj-verma-9223a2423?utm_source=share_via&utm_content=profile&utm_medium=member_android)
+
