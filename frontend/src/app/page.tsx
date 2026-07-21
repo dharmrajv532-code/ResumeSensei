@@ -79,6 +79,7 @@ interface Message {
 }
 
 export default function Home() {
+  const [viewMode, setViewMode] = useState<"landing" | "app">("landing");
   const [sessionId, setSessionId] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>("");
@@ -386,6 +387,182 @@ export default function Home() {
     );
   };
 
+  if (viewMode === "landing") {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col antialiased relative overflow-x-hidden">
+        {/* Background gradient shapes */}
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-500/5 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-cyan-500/5 blur-[120px] pointer-events-none" />
+        <div className="absolute top-[30%] right-[20%] w-[300px] h-[300px] rounded-full bg-purple-500/5 blur-[100px] pointer-events-none" />
+
+        {/* Header */}
+        <header className="border-b border-slate-900 bg-slate-950/70 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2.5 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-600/10">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 className="font-extrabold text-lg bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+                ResumeSensei
+              </h1>
+              <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">AI Career Coach</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <a href="https://github.com/dharmrajv532-code/ResumeSensei" target="_blank" rel="noreferrer" className="text-sm text-slate-400 hover:text-white transition-colors hidden sm:block">
+              GitHub Repo
+            </a>
+            <button
+              onClick={() => setViewMode("app")}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl flex items-center gap-1.5 shadow-lg shadow-indigo-600/20 transition-all active:scale-95 cursor-pointer"
+            >
+              Launch Workspace <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </header>
+
+        {/* Hero Section */}
+        <main className="flex-1 flex flex-col items-center justify-center max-w-6xl mx-auto px-6 py-16 sm:py-24 text-center z-10 space-y-12">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold rounded-full animate-pulse">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Powered by Groq High-Speed Inference</span>
+          </div>
+
+          {/* Heading */}
+          <div className="space-y-6 max-w-3xl">
+            <h2 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.1]">
+              Tailor Your Resume For Your{" "}
+              <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                Dream Job
+              </span>
+            </h2>
+            <p className="text-slate-400 text-base sm:text-xl leading-relaxed max-w-2xl mx-auto">
+              ResumeSensei compares your resume against any Job Description to generate fit scores, identify missing skills, point out formatting errors, and write metric-driven STAR bullet points.
+            </p>
+          </div>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button
+              onClick={() => setViewMode("app")}
+              className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl flex items-center gap-2 shadow-xl shadow-indigo-600/20 hover:shadow-indigo-600/35 transition-all active:scale-95 cursor-pointer text-base"
+            >
+              Analyze Your Resume <ArrowRight className="w-5 h-5" />
+            </button>
+            <a
+              href="https://github.com/dharmrajv532-code/ResumeSensei"
+              target="_blank"
+              rel="noreferrer"
+              className="px-8 py-4 bg-slate-900/50 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-200 font-bold rounded-2xl flex items-center gap-2 transition-all text-base"
+            >
+              View GitHub Repo
+            </a>
+          </div>
+
+          {/* Interactive Mockup Preview */}
+          <div className="w-full max-w-4xl bg-slate-900/40 border border-slate-900 rounded-3xl p-6 md:p-8 backdrop-blur-sm relative overflow-hidden shadow-2xl">
+            <div className="absolute top-0 left-0 w-full h-[4px] bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500" />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+              {/* Left Side: Mock chat */}
+              <div className="bg-slate-950/60 border border-slate-900 rounded-2xl p-5 space-y-4">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <Bot className="w-4 h-4 text-indigo-400" />
+                  <span>ResumeSensei Assistant</span>
+                </div>
+                <p className="text-xs text-slate-300 leading-relaxed bg-slate-900/40 p-3 rounded-xl border border-slate-900">
+                  "Hello! I analyzed your resume against the <b>Senior React Developer</b> JD. Your overall score is <b>82%</b>. You have excellent React skills, but lack <b>Next.js</b> and <b>Redux</b>. Let's rewrite your bullet points to reflect this."
+                </p>
+                <div className="flex items-center gap-2.5 p-2.5 bg-indigo-600/10 border border-indigo-500/20 rounded-xl">
+                  <FileText className="w-4 h-4 text-indigo-400" />
+                  <div className="text-[10px]">
+                    <p className="font-bold text-slate-200">my_resume_developer.pdf</p>
+                    <p className="text-slate-400 uppercase font-semibold">PDF • 1.2 MB</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Side: Mock dashboard */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Analysis Summary</span>
+                  <span className="px-2 py-0.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/35 text-[10px] font-bold rounded-full">
+                    Match Score: 85%
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-slate-950/40 p-3 rounded-xl border border-slate-900 text-center">
+                    <p className="text-[10px] text-slate-400">Content Quality</p>
+                    <p className="text-lg font-extrabold text-indigo-400 mt-1">90%</p>
+                  </div>
+                  <div className="bg-slate-950/40 p-3 rounded-xl border border-slate-900 text-center">
+                    <p className="text-[10px] text-slate-400">Keywords Match</p>
+                    <p className="text-lg font-extrabold text-indigo-400 mt-1">80%</p>
+                  </div>
+                </div>
+                <div className="bg-slate-950/40 p-3.5 rounded-xl border border-slate-900 space-y-1.5">
+                  <span className="text-[9px] uppercase tracking-wider font-extrabold text-emerald-400">Suggested Rewrite:</span>
+                  <p className="text-[11px] text-slate-350 leading-relaxed italic">"Developed APIs using Python" ➡️ "Architected FastAPI backend supporting 10k+ requests, reducing response latency by 30%"</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Features Grid */}
+          <div className="w-full pt-16 space-y-8">
+            <div className="space-y-2">
+              <h3 className="text-2xl font-bold text-slate-200">Built for Peak Professional Optimization</h3>
+              <p className="text-sm text-slate-400">Everything you need to tailor, polish, and optimize your application package.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Feature 1 */}
+              <div className="bg-slate-900/20 border border-slate-900 hover:border-slate-850 p-6 rounded-2xl text-left space-y-4 hover:scale-[1.02] transition-all">
+                <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl w-fit">
+                  <Bot className="w-6 h-6" />
+                </div>
+                <h4 className="font-bold text-slate-200 text-lg">Conversational AI Coach</h4>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Discuss issues directly in chat. Ask for detailed project descriptions, resume summary rewrites, or cover letter tailoring.
+                </p>
+              </div>
+              {/* Feature 2 */}
+              <div className="bg-slate-900/20 border border-slate-900 hover:border-slate-850 p-6 rounded-2xl text-left space-y-4 hover:scale-[1.02] transition-all">
+                <div className="p-3 bg-cyan-500/10 text-cyan-400 rounded-xl w-fit">
+                  <Award className="w-6 h-6" />
+                </div>
+                <h4 className="font-bold text-slate-200 text-lg">STAR Bullet Points Rewrites</h4>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Convert weak descriptions into impact-oriented achievements incorporating action verbs, tasks, and concrete metrics.
+                </p>
+              </div>
+              {/* Feature 3 */}
+              <div className="bg-slate-900/20 border border-slate-900 hover:border-slate-850 p-6 rounded-2xl text-left space-y-4 hover:scale-[1.02] transition-all">
+                <div className="p-3 bg-purple-500/10 text-purple-400 rounded-xl w-fit">
+                  <Briefcase className="w-6 h-6" />
+                </div>
+                <h4 className="font-bold text-slate-200 text-lg">Scanned OCR Support</h4>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Features advanced image-to-text OCR conversion. Upload scanned PDFs or resume screenshots for multimodal AI analysis.
+                </p>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="border-t border-slate-900 py-6 text-center text-xs text-slate-500 z-10 flex flex-col items-center gap-3">
+          <div className="flex gap-4">
+            <a href="mailto:dharmrajv532@gmail.com" className="hover:text-white transition-colors">dharmrajv532@gmail.com</a>
+            <span>•</span>
+            <a href="https://www.linkedin.com/in/dharmraj-verma-9223a2423?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">LinkedIn Profile</a>
+          </div>
+          <p>&copy; {new Date().getFullYear()} ResumeSensei. Built by Dharmraj Verma.</p>
+        </footer>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen bg-slate-950 text-slate-100 flex flex-col antialiased overflow-hidden">
       {/* Background decoration */}
@@ -433,6 +610,14 @@ export default function Home() {
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">New Chat</span>
+          </button>
+
+          <button
+            onClick={() => setViewMode("landing")}
+            className="p-1.5 sm:px-3 sm:py-1.5 border border-slate-900 bg-slate-950 text-slate-350 rounded-lg text-xs font-semibold hover:bg-slate-900 transition-colors"
+            title="Go back to landing page"
+          >
+            <span>Home</span>
           </button>
         </div>
       </header>
