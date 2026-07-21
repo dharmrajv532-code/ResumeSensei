@@ -1,4 +1,25 @@
-# ResumeSensei - AI-Powered Resume Analyser & Job Matcher
+<div align="center">
+  <img src="assets/welcome_page.png" alt="ResumeSensei Header" width="100%" style="border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);" />
+
+  # 🎓 ResumeSensei
+  <h3>AI-Powered Conversational Resume Analyser & Job Matching Agent</h3>
+
+  <p align="center">
+    <img src="https://img.shields.io/badge/Next.js-16-blue?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" />
+    <img src="https://img.shields.io/badge/FastAPI-v0.111-emerald?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
+    <img src="https://img.shields.io/badge/Groq-Llama--3.3-orange?style=for-the-badge&logo=groq&logoColor=white" alt="Groq" />
+    <img src="https://img.shields.io/badge/Tailwind--v4-38BDF8?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind" />
+  </p>
+
+  <br />
+  
+  <h3>✨ See It In Action (WebP Demo) ✨</h3>
+  <img src="assets/demo.webp" alt="ResumeSensei Demo Run" width="95%" style="border-radius: 12px; border: 1px solid #1e293b; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);" />
+</div>
+
+<br />
+
+---
 
 ResumeSensei is an interactive, conversational web application designed to help job seekers critique and tailor their resumes against specific Job Descriptions (JDs). Powered by Groq's high-speed inference engine, the app conducts deep text parsing and image-based scanned PDF/OCR analysis to generate structured scores, match insights, and bullet rewrites side-by-side with an AI career coach chat window.
 
@@ -17,6 +38,30 @@ ResumeSensei is an interactive, conversational web application designed to help 
   * **Flaws & Issues Identification**: Severity-coded warnings highlighting weak sections, structural errors, or lack of metrics.
   * **Actionable Bullet Point Rewrites**: Side-by-side comparison of original bullet points with tailored, metric-driven *Task-Action-Result* (STAR) versions.
 * **In-Memory & Privacy-First**: Resumes are processed in-memory and are never stored in a database. Sessions are cleared upon request or after inactivity.
+
+---
+
+## 📸 Visual Interface Tour
+
+Here is a visual walkthrough of the ResumeSensei experience:
+
+### 💡 1. Welcome Screen & Workspace Initialization
+When you open the app, you are greeted by the clean, minimal workspace. The assistant explains how to paste a Job Description and attach your resume.
+<p align="center">
+  <img src="assets/welcome_page.png" alt="Welcome Screen" width="90%" style="border-radius: 8px; border: 1px solid #1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.2);" />
+</p>
+
+### 📊 2. Side-by-Side Analysis Dashboard
+Upon uploading your resume, the dashboard slides into view on the right, providing an interactive, visual breakdown of your scores, issues, missing sections, and checklist items.
+<p align="center">
+  <img src="assets/analysis_dashboard.png" alt="Analysis Dashboard" width="90%" style="border-radius: 8px; border: 1px solid #1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.2);" />
+</p>
+
+### 💬 3. Context-Aware Follow-up QA
+Ask any follow-up questions. ResumeSensei references the saved JD, resume details, and prior scores, guiding you step-by-step to improve specific bullet points.
+<p align="center">
+  <img src="assets/followup_response.png" alt="Follow-up QA" width="90%" style="border-radius: 8px; border: 1px solid #1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.2);" />
+</p>
 
 ---
 
