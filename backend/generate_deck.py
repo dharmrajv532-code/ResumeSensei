@@ -14,18 +14,19 @@ prs.slide_height = Inches(7.5)
 # Remove default layout slide margins
 blank_slide_layout = prs.slide_layouts[6]
 
-# 2. Design Tokens / Cohesive Slate Dark Palette
-BG_COLOR = RGBColor(11, 15, 25)         # #0B0F19 - slate-950
-CARD_COLOR = RGBColor(30, 41, 59)       # #1E293B - slate-800
-TEXT_COLOR = RGBColor(248, 250, 252)     # #F8FAFC - slate-50
-MUTED_COLOR = RGBColor(148, 163, 184)    # #94A3B8 - slate-400
-BORDER_COLOR = RGBColor(71, 85, 105)     # #475569 - slate-600
+# 2. Design Tokens / Cohesive Premium Obsidian Palette
+BG_COLOR = RGBColor(3, 7, 18)           # #030712 - Obsidian Dark
+CARD_COLOR = RGBColor(15, 23, 42)       # #0F172A - Slate Dark
+TEXT_COLOR = RGBColor(248, 250, 252)     # #F8FAFC - Slate 50
+MUTED_COLOR = RGBColor(148, 163, 184)    # #94A3B8 - Slate 400
+BORDER_COLOR = RGBColor(30, 41, 59)      # #1E293B - Card Border
 
 # Highlights
-ACCENT_EMERALD = RGBColor(16, 185, 129)  # #10B981 - emerald-500
-ACCENT_CYAN = RGBColor(6, 182, 212)      # #06B6D4 - cyan-500
-ACCENT_RED = RGBColor(239, 68, 68)       # #EF4444 - red-500
-ACCENT_ORANGE = RGBColor(249, 115, 22)    # #F97316 - orange-500
+ACCENT_EMERALD = RGBColor(16, 185, 129)  # #10B981 - Bright Emerald
+ACCENT_CYAN = RGBColor(6, 182, 212)      # #06B6D4 - Electric Cyan
+ACCENT_PURPLE = RGBColor(168, 85, 247)   # #A855F7 - Neon Purple
+ACCENT_RED = RGBColor(239, 68, 68)       # #EF4444 - Accent Red
+ACCENT_ORANGE = RGBColor(249, 115, 22)    # #F97316 - Accent Orange
 
 FONT_NAME = "Segoe UI"
 
@@ -34,6 +35,41 @@ def set_slide_background(slide):
     fill = background.fill
     fill.solid()
     fill.fore_color.rgb = BG_COLOR
+
+def set_fade_transition(slide):
+    """Programmatically sets standard fade transition to a slide using OpenXML."""
+    try:
+        from pptx.oxml.xmlchemy import OxmlElement
+        sld = slide._element
+        # Clean existing transitions
+        for child in list(sld):
+            if child.tag.endswith('transition'):
+                sld.remove(child)
+        transition = OxmlElement('p:transition')
+        transition.set('spd', 'med')
+        fade = OxmlElement('p:fade')
+        transition.append(fade)
+        sld.append(transition)
+    except Exception as e:
+        print(f"Failed to set fade transition: {e}")
+
+def set_morph_transition(slide):
+    """Programmatically sets morph transition to a slide using OpenXML."""
+    try:
+        from pptx.oxml.xmlchemy import OxmlElement
+        sld = slide._element
+        # Clean existing transitions
+        for child in list(sld):
+            if child.tag.endswith('transition'):
+                sld.remove(child)
+        transition = OxmlElement('p:transition')
+        transition.set('spd', 'med')
+        morph = OxmlElement('p:morph')
+        transition.append(morph)
+        sld.append(transition)
+    except Exception as e:
+        print(f"Failed to set morph transition: {e}")
+
 
 def add_header(slide, title_text, category_text=None):
     # Category (small tag above title)
@@ -47,7 +83,7 @@ def add_header(slide, title_text, category_text=None):
         p.font.name = FONT_NAME
         p.font.size = Pt(10)
         p.font.bold = True
-        p.font.color.rgb = ACCENT_CYAN
+        p.font.color.rgb = ACCENT_PURPLE
         
     # Title
     title_box = slide.shapes.add_textbox(Inches(0.8), Inches(0.65), Inches(11.7), Inches(0.8))
@@ -61,54 +97,103 @@ def add_header(slide, title_text, category_text=None):
     p.font.bold = True
     p.font.color.rgb = TEXT_COLOR
 
+def parse_bullet_text(text):
+    """Splits a line of text at the first ': ' to allow bold-highlight keyphrases."""
+    if ": " in text:
+        parts = text.split(": ", 1)
+        return parts[0] + ": ", parts[1]
+    return "", text
+
 def add_card(slide, left, top, width, height, title, content_paragraphs=None, accent_color=None, text_size=13):
+    # 1. Add background card shape (Rounded Rectangle)
     shape = slide.shapes.add_shape(
         MSO_SHAPE.ROUNDED_RECTANGLE, left, top, width, height
     )
     shape.fill.solid()
     shape.fill.fore_color.rgb = CARD_COLOR
+    shape.line.color.rgb = BORDER_COLOR
+    shape.line.width = Pt(1)
     
-    if accent_color:
-        shape.line.color.rgb = accent_color
-        shape.line.width = Pt(1.5)
-    else:
-        shape.line.color.rgb = BORDER_COLOR
-        shape.line.width = Pt(1)
-        
+    # 2. Add Top Accent Bar (representing premium SaaS UI card header)
+    accent_bar_color = accent_color if accent_color else ACCENT_CYAN
+    bar_height = Inches(0.08)
+    bar = slide.shapes.add_shape(
+        MSO_SHAPE.RECTANGLE, left, top, width, bar_height
+    )
+    bar.fill.solid()
+    bar.fill.fore_color.rgb = accent_bar_color
+    bar.line.fill.background() # No border
+    
+    # 3. Add Content Text frame inside the card bounds
     padding = Inches(0.2)
-    tb = slide.shapes.add_textbox(left + padding, top + padding, width - 2*padding, height - 2*padding)
+    text_top = top + bar_height + Inches(0.1)
+    text_height = height - bar_height - Inches(0.2)
+    
+    tb = slide.shapes.add_textbox(left + padding, text_top, width - 2*padding, text_height)
     tf = tb.text_frame
     tf.word_wrap = True
     tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
     
+    # Render Card Title
     p_title = tf.paragraphs[0]
     p_title.text = title
     p_title.font.name = FONT_NAME
     p_title.font.size = Pt(16)
     p_title.font.bold = True
-    p_title.font.color.rgb = accent_color if accent_color else ACCENT_CYAN
-    p_title.space_after = Pt(8)
+    p_title.font.color.rgb = accent_bar_color
+    p_title.space_after = Pt(10)
     
+    # Render Paragraphs/Bullets with Bold-Highlight runs
     if content_paragraphs:
         for idx, text in enumerate(content_paragraphs):
             p = tf.add_paragraph() if idx > 0 or p_title.text else tf.paragraphs[0]
-            p.text = text
-            p.font.name = FONT_NAME
-            p.font.size = Pt(text_size)
-            p.font.color.rgb = TEXT_COLOR
+            
+            is_bullet = text.startswith("• ")
+            if is_bullet:
+                text = text[2:] # Strip prefix
+                
+            bold_part, regular_part = parse_bullet_text(text)
+            
+            if bold_part:
+                # Add bold keyphrase run
+                run_bold = p.add_run()
+                run_bold.text = "• " + bold_part if is_bullet else bold_part
+                run_bold.font.bold = True
+                run_bold.font.name = FONT_NAME
+                run_bold.font.size = Pt(text_size)
+                run_bold.font.color.rgb = accent_bar_color
+                
+                # Add normal description run
+                run_reg = p.add_run()
+                run_reg.text = regular_part
+                run_reg.font.bold = False
+                run_reg.font.name = FONT_NAME
+                run_reg.font.size = Pt(text_size)
+                run_reg.font.color.rgb = TEXT_COLOR
+            else:
+                # Fallback simple run
+                run = p.add_run()
+                run.text = "• " + regular_part if is_bullet else regular_part
+                run.font.bold = False
+                run.font.name = FONT_NAME
+                run.font.size = Pt(text_size)
+                run.font.color.rgb = TEXT_COLOR
+                
             p.space_after = Pt(6)
 
 def add_diagram_node(slide, left, top, width, height, label, is_active=False):
+    # Rounded node representing pipeline components
     shape = slide.shapes.add_shape(
         MSO_SHAPE.ROUNDED_RECTANGLE, left, top, width, height
     )
     shape.fill.solid()
-    shape.fill.fore_color.rgb = CARD_COLOR if not is_active else BG_COLOR
     
     if is_active:
+        shape.fill.fore_color.rgb = CARD_COLOR
         shape.line.color.rgb = ACCENT_EMERALD
         shape.line.width = Pt(2.5)
     else:
+        shape.fill.fore_color.rgb = BG_COLOR
         shape.line.color.rgb = BORDER_COLOR
         shape.line.width = Pt(1)
         
@@ -135,6 +220,7 @@ def add_diagram_arrow(slide, left, top, width, height, is_active=False):
 # ----------------- SLIDE 1: Title Slide -----------------
 slide1 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide1)
+set_fade_transition(slide1)
 
 # Main Title block on the left
 title_box = slide1.shapes.add_textbox(Inches(1.0), Inches(1.8), Inches(6.5), Inches(3.5))
@@ -165,59 +251,62 @@ p_author.font.color.rgb = MUTED_COLOR
 
 # Right graphic cards to balance the slide
 add_card(slide1, Inches(8.2), Inches(1.8), Inches(4.2), Inches(1.8), "Frontend Application", 
-         ["Next.js App Router", "Tailwind CSS v4 Dashboard", "Dynamic dual-pane UI"], ACCENT_CYAN)
+         ["Next.js App Router: Responsive UI framework", "Tailwind CSS v4: Core styling utility", "Dual-Pane Layout: Interactive interface"], ACCENT_CYAN)
 
 add_card(slide1, Inches(8.2), Inches(3.9), Inches(4.2), Inches(1.8), "Backend REST API", 
-         ["FastAPI & Uvicorn Server", "Multi-format Document Parsers", "Groq AI Inference Pipeline"], ACCENT_CYAN)
+         ["FastAPI Server: High performance async", "Hybrid Parsers: PDF/DOCX and Scanned OCR", "Groq AI Inference: Fast model queries"], ACCENT_PURPLE)
 
 
 # ----------------- SLIDE 2: Executive Summary -----------------
 slide2 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide2)
+set_fade_transition(slide2)
 add_header(slide2, "Executive Summary", "Project Context")
 
 add_card(slide2, Inches(0.8), Inches(1.8), Inches(5.6), Inches(4.8), "The Core Vision", [
-    "• Bridge the communication gap between candidates and rigid hiring standards.",
-    "• Deliver instant, high-quality, actionable feedback to job seekers in seconds.",
-    "• Replace static, one-way resume feedback tools with a context-aware, conversational career coach interface.",
-    "• Provide a dual-pane workspace that provides structured analytics side-by-side with an interactive dialogue."
+    "• Bridge the Gap: Connect candidate resume experience to rigid recruitment filters.",
+    "• Deliver instant Value: Generate structured analysis scores and STAR rewrites in seconds.",
+    "• Contextual coaching: Replace static analyzer templates with a context-aware conversational tutor.",
+    "• Dual-Pane workspace: Render detailed analytics dashboard and dialogue chat side-by-side."
 ], ACCENT_EMERALD, text_size=14)
 
 add_card(slide2, Inches(6.8), Inches(1.8), Inches(5.6), Inches(4.8), "Key Engineering Pillars", [
     "• Hybrid Document Parsing: High-accuracy extraction from digital PDFs/DOCX files combined with vision-based scanned PDF rendering.",
-    "• Context-Aware Memory: Track the target job description, resume content, and conversational history for seamless follow-up coaching.",
+    "• Context-Aware Memory: Track target JDs, resume details, and chat history for seamless follow-up coach advice.",
     "• Fast Inference Pipeline: Sub-second JSON response generation utilizing Groq's high-speed inference engine.",
     "• Privacy-First State: In-memory session tracking with zero database persistence and automatic session cleanups."
-], ACCENT_CYAN, text_size=14)
+], ACCENT_PURPLE, text_size=14)
 
 
 # ----------------- SLIDE 3: The Challenge (Problem Statement) -----------------
 slide3 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide3)
+set_fade_transition(slide3)
 add_header(slide3, "The Challenge", "Problem Statement")
 
 add_card(slide3, Inches(0.8), Inches(1.8), Inches(3.6), Inches(4.8), "1. The ATS Black Box", [
-    "• Rejection without details: Automated Tracking Systems screen out candidates with generic rejection emails.",
-    "• Missing keywords: Strong candidates are filtered out simply due to synonym variance or formatting bugs.",
-    "• No action plan: Candidates do not know how to align their experiences to job requirements."
+    "• Rejection without Details: Automated Tracking Systems screen out candidates with generic rejection emails.",
+    "• Missing Keywords: Strong candidates are filtered out simply due to synonym variance or formatting bugs.",
+    "• No Action Plan: Candidates do not know how to align their experiences to job requirements."
 ], ACCENT_RED, text_size=13)
 
 add_card(slide3, Inches(4.8), Inches(1.8), Inches(3.6), Inches(4.8), "2. Manual Review Limits", [
     "• The 6-Second Screen: Recruiters spend seconds scanning each profile, leading to high false-negative rates.",
-    "• Lack of personalization: Providing detailed bullet-point rewrites manually for thousands of applicants is impossible.",
+    "• Lack of Personalisation: Providing detailed bullet-point rewrites manually for thousands of applicants is impossible.",
     "• Skill Gap Overhead: Manually matching CV skills against job requirements is slow and error-prone."
 ], ACCENT_RED, text_size=13)
 
 add_card(slide3, Inches(8.8), Inches(1.8), Inches(3.6), Inches(4.8), "3. Scanned & Garbled Files", [
     "• OCR Extraction Failures: Scanned images and double-column PDFs are frequently mangled by basic parser scripts.",
     "• Security Injections: Malicious resumes attempt to hijack parser prompts to force top scores.",
-    "• Inefficient iteration: Creating multiple tailored resumes manually takes hours per job application."
+    "• Inefficient Iteration: Creating multiple tailored resumes manually takes hours per job application."
 ], ACCENT_RED, text_size=13)
 
 
-# ----------------- SLIDE 4: The Innovation (Solution) -----------------
+# ----------------- SLIDE 4: The Innovation (Solution Overview) -----------------
 slide4 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide4)
+set_fade_transition(slide4)
 add_header(slide4, "The Innovation", "Solution Overview")
 
 add_card(slide4, Inches(0.8), Inches(1.8), Inches(3.6), Inches(4.8), "Interactive Career Coach", [
@@ -239,9 +328,10 @@ add_card(slide4, Inches(8.8), Inches(1.8), Inches(3.6), Inches(4.8), "Engineered
 ], ACCENT_EMERALD, text_size=13)
 
 
-# ----------------- SLIDE 5: Architecture - Step 1: Input -----------------
+# ----------------- SLIDE 5: Architecture - Step 1: Input (Morph Stage 1) -----------------
 slide5 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide5)
+set_fade_transition(slide5)
 add_header(slide5, "System Architecture: Stage 1", "Process Flow (Morph Animation 1)")
 
 # Draw Diagram
@@ -253,16 +343,17 @@ add_diagram_node(slide5, Inches(9.6), Inches(1.8), Inches(2.8), Inches(1.0), "3.
 
 # Details Card below
 add_card(slide5, Inches(0.8), Inches(3.4), Inches(11.7), Inches(3.2), "Stage Details: Input Submission & Validation", [
-    "• Multimodal Uploads: Supports PDF, DOCX, and image formats (JPG, JPEG, PNG). File size is restricted to 5MB to ensure sub-second uploads.",
+    "• Multimodal Uploads: Supports PDF, DOCX, and image formats (JPG, JPEG, PNG) up to 5MB.",
     "• Job Description Parsing: The JD text is pasted directly into the conversational interface, triggering the backend session parser.",
     "• CORS & API Guards: Requests pass through CORS middleware, restricting operations to allowed origins or trusted local dev environments.",
     "• Session Initialization: A unique, client-side session ID is generated, separating individual workspaces securely."
 ], ACCENT_EMERALD, text_size=14)
 
 
-# ----------------- SLIDE 6: Architecture - Step 2: Parsing -----------------
+# ----------------- SLIDE 6: Architecture - Step 2: Parsing (Morph Stage 2) -----------------
 slide6 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide6)
+set_morph_transition(slide6)  # Set Morph transition!
 add_header(slide6, "System Architecture: Stage 2", "Process Flow (Morph Animation 2)")
 
 # Draw Diagram
@@ -281,9 +372,10 @@ add_card(slide6, Inches(0.8), Inches(3.4), Inches(11.7), Inches(3.2), "Stage Det
 ], ACCENT_EMERALD, text_size=14)
 
 
-# ----------------- SLIDE 7: Architecture - Step 3: Analysis -----------------
+# ----------------- SLIDE 7: Architecture - Step 3: Analysis (Morph Stage 3) -----------------
 slide7 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide7)
+set_morph_transition(slide7)  # Set Morph transition!
 add_header(slide7, "System Architecture: Stage 3", "Process Flow (Morph Animation 3)")
 
 # Draw Diagram
@@ -305,6 +397,7 @@ add_card(slide7, Inches(0.8), Inches(3.4), Inches(11.7), Inches(3.2), "Stage Det
 # ----------------- SLIDE 8: Next.js Frontend Architecture -----------------
 slide8 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide8)
+set_fade_transition(slide8)
 add_header(slide8, "Next.js Frontend Architecture", "Client Application Structure")
 
 add_card(slide8, Inches(0.8), Inches(1.8), Inches(5.6), Inches(4.8), "Tech Stack & Configurations", [
@@ -325,6 +418,7 @@ add_card(slide8, Inches(6.8), Inches(1.8), Inches(5.6), Inches(4.8), "Client-Sid
 # ----------------- SLIDE 9: FastAPI Backend Architecture -----------------
 slide9 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide9)
+set_fade_transition(slide9)
 add_header(slide9, "FastAPI Backend Architecture", "Server Engine")
 
 add_card(slide9, Inches(0.8), Inches(1.8), Inches(5.6), Inches(4.8), "FastAPI Server Design", [
@@ -332,19 +426,20 @@ add_card(slide9, Inches(0.8), Inches(1.8), Inches(5.6), Inches(4.8), "FastAPI Se
     "• CORS Middleware Settings: Restricts client origins dynamically based on env setups while allowing standard dev configs.",
     "• Error Middleware: Normalizes exception messages and error status returns (e.g. 400 Bad Request on empty inputs).",
     "• Lightweight Environment: Fast build, low-memory footprint, relying on light python packages."
-], ACCENT_EMERALD, text_size=14)
+], ACCENT_PURPLE, text_size=14)
 
 add_card(slide9, Inches(6.8), Inches(1.8), Inches(5.6), Inches(4.8), "Session Lifecycle Manager", [
     "• ChatSession Object: Stores current JD text, extracted resume text, image blobs, history lists, and analysis JSON in memory.",
     "• Housekeeping Worker: Every endpoint invocation triggers an automatic cleanup of inactive sessions older than 2 hours.",
     "• Session Reset Hook: Clears session history and dashboard contents on user request (/session/reset).",
     "• In-Memory Store: Saves resources and speeds up requests without requiring external DB databases."
-], ACCENT_EMERALD, text_size=14)
+], ACCENT_PURPLE, text_size=14)
 
 
-# ----------------- SLIDE 10: Document Parsing: Digital Files -----------------
+# ----------------- SLIDE 10: Parsing Digital Files (PDF & DOCX) -----------------
 slide10 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide10)
+set_fade_transition(slide10)
 add_header(slide10, "Parsing Digital Files", "Data Ingestion Pipeline")
 
 add_card(slide10, Inches(0.8), Inches(1.8), Inches(5.6), Inches(4.8), "PDF Text Parsing via pdfplumber", [
@@ -362,9 +457,10 @@ add_card(slide10, Inches(6.8), Inches(1.8), Inches(5.6), Inches(4.8), "DOCX Text
 ], ACCENT_CYAN, text_size=14)
 
 
-# ----------------- SLIDE 11: Document Parsing: Scanned Files -----------------
+# ----------------- SLIDE 11: Parsing Scanned Resumes (OCR & Vision) -----------------
 slide11 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide11)
+set_fade_transition(slide11)
 add_header(slide11, "Parsing Scanned Resumes", "Vision & OCR Fallback")
 
 add_card(slide11, Inches(0.8), Inches(1.8), Inches(5.6), Inches(4.8), "Image Conversion Pipeline", [
@@ -379,12 +475,13 @@ add_card(slide11, Inches(6.8), Inches(1.8), Inches(5.6), Inches(4.8), "Multimoda
     "• Llama Vision Model: Sends images directly to Groq's multimodal engine to extract visual resume structures.",
     "• Table & Column Parsing: Groq's vision engine deciphers multi-column tables and sidebar skills boxes.",
     "• Context Integration: Merges vision-extracted data with the main chat history, keeping the analysis dashboard active."
-], ACCENT_CYAN, text_size=14)
+], ACCENT_PURPLE, text_size=14)
 
 
-# ----------------- SLIDE 12: The AI Analysis Engine -----------------
+# ----------------- SLIDE 12: The AI Analysis Engine (Groq & Llama) -----------------
 slide12 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide12)
+set_fade_transition(slide12)
 add_header(slide12, "The AI Analysis Engine", "Groq & Llama-3.3 Integration")
 
 add_card(slide12, Inches(0.8), Inches(1.8), Inches(5.6), Inches(4.8), "Groq LLM Orchestration", [
@@ -398,13 +495,14 @@ add_card(slide12, Inches(6.8), Inches(1.8), Inches(5.6), Inches(4.8), "Pydantic 
     "• Output Format Assurance: Enforces the exact fields required by the Next.js React frontend.",
     "• Automatic Field Casts: Converts text scores to integers (0-100) and aggregates missing categories into clean lists.",
     "• Fallback Schema: Gracefully handles partial LLM JSON parses by returning baseline empty lists instead of crashes.",
-    "• Flexible Mapping: maps technical lists directly to green matched and red missing chips."
+    "• Flexible Mapping: Maps technical lists directly to green matched and red missing chips."
 ], ACCENT_EMERALD, text_size=14)
 
 
 # ----------------- SLIDE 13: Prompt Safety & Injection Guard -----------------
 slide13 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide13)
+set_fade_transition(slide13)
 add_header(slide13, "Prompt Safety & Injection Guard", "Security Architecture")
 
 add_card(slide13, Inches(0.8), Inches(1.8), Inches(5.6), Inches(4.8), "The Prompt Injection Threat", [
@@ -417,13 +515,14 @@ add_card(slide13, Inches(6.8), Inches(1.8), Inches(5.6), Inches(4.8), "Security 
     "• Passive Data Isolation: The LLM system prompt strictly defines the resume text as passive data, never instructions.",
     "• Explicit Disregard Directives: The system prompt includes rules instructing the model to ignore user commands inside the CV.",
     "• JSON-Only Constraints: Structured outputs prevent hijacked prompts from outputting raw markdown commands or scripts.",
-    "• Size & Rate Rate Limits: Restricts file sizes to prevent denial of service attacks via token exhaustion."
+    "• Size & Rate Limits: Restricts file sizes to prevent denial of service attacks via token exhaustion."
 ], ACCENT_EMERALD, text_size=14)
 
 
-# ----------------- SLIDE 14: The Scoring Model -----------------
+# ----------------- SLIDE 14: The Scoring Model & Parameters -----------------
 slide14 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide14)
+set_fade_transition(slide14)
 add_header(slide14, "The Scoring Model", "Evaluation Parameters")
 
 add_card(slide14, Inches(0.8), Inches(1.8), Inches(2.6), Inches(4.8), "Content\n(30% Weight)", [
@@ -436,7 +535,7 @@ add_card(slide14, Inches(3.8), Inches(1.8), Inches(2.6), Inches(4.8), "Formattin
     "• Analyzes consistent layout margins and text spacing.",
     "• Flag missing essential sections.",
     "• Checks for excess word wrap."
-], ACCENT_CYAN, text_size=13)
+], ACCENT_PURPLE, text_size=13)
 
 add_card(slide14, Inches(6.8), Inches(1.8), Inches(2.6), Inches(4.8), "Keywords\n(30% Weight)", [
     "• Compares resume keywords against the JD.",
@@ -448,12 +547,13 @@ add_card(slide14, Inches(9.8), Inches(1.8), Inches(2.6), Inches(4.8), "Impact\n(
     "• Looks for metrics and quantified successes.",
     "• Evaluates Task-Action-Result outcomes.",
     "• Flags simple task checklists."
-], ACCENT_CYAN, text_size=13)
+], ACCENT_EMERALD, text_size=13)
 
 
 # ----------------- SLIDE 15: Skills Gap Analyzer -----------------
 slide15 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide15)
+set_fade_transition(slide15)
 add_header(slide15, "Skills Gap Analyzer", "Job Matching Engine")
 
 add_card(slide15, Inches(0.8), Inches(1.8), Inches(5.6), Inches(4.8), "Matched Skills (Green Chips)", [
@@ -472,6 +572,7 @@ add_card(slide15, Inches(6.8), Inches(1.8), Inches(5.6), Inches(4.8), "Missing S
 # ----------------- SLIDE 16: Flaws & Severity Indicators -----------------
 slide16 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide16)
+set_fade_transition(slide16)
 add_header(slide16, "Flaws & Severity Indicators", "Issue Diagnostics")
 
 add_card(slide16, Inches(0.8), Inches(1.8), Inches(3.6), Inches(4.8), "High Severity Issues", [
@@ -496,6 +597,7 @@ add_card(slide16, Inches(8.8), Inches(1.8), Inches(3.6), Inches(4.8), "Low Sever
 # ----------------- SLIDE 17: Actionable Bullet Rewrites -----------------
 slide17 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide17)
+set_fade_transition(slide17)
 add_header(slide17, "Actionable Bullet Rewrites", "STAR-Method Rewrite Engine")
 
 add_card(slide17, Inches(0.8), Inches(1.8), Inches(3.6), Inches(4.8), "Original Bullet (Weak)", [
@@ -520,6 +622,7 @@ add_card(slide17, Inches(8.8), Inches(1.8), Inches(3.6), Inches(4.8), "Recruiter
 # ----------------- SLIDE 18: Conversational Career Coach -----------------
 slide18 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide18)
+set_fade_transition(slide18)
 add_header(slide18, "Conversational Career Coach", "The Chat Interface")
 
 add_card(slide18, Inches(0.8), Inches(1.8), Inches(5.6), Inches(4.8), "Context Retention Architecture", [
@@ -540,6 +643,7 @@ add_card(slide18, Inches(6.8), Inches(1.8), Inches(5.6), Inches(4.8), "Tailoring
 # ----------------- SLIDE 19: Future Scope & Roadmap -----------------
 slide19 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide19)
+set_fade_transition(slide19)
 add_header(slide19, "Future Scope & Roadmap", "Strategic Evolution")
 
 add_card(slide19, Inches(0.8), Inches(1.8), Inches(3.6), Inches(4.8), "Phase 1: Mock Interviews", [
@@ -561,6 +665,7 @@ add_card(slide19, Inches(8.8), Inches(1.8), Inches(3.6), Inches(4.8), "Phase 3: 
 # ----------------- SLIDE 20: Conclusion & Demo Link -----------------
 slide20 = prs.slides.add_slide(blank_slide_layout)
 set_slide_background(slide20)
+set_fade_transition(slide20)
 add_header(slide20, "Conclusion & Resources", "Closing & Project Links")
 
 add_card(slide20, Inches(0.8), Inches(1.8), Inches(5.6), Inches(4.8), "Summary of Value", [
